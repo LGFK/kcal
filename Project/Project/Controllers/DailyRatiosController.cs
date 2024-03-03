@@ -41,15 +41,17 @@ namespace Project.Controllers
         {
             try
             {
-                var settings = _
+                
                 var dailyR = (await _ratioRepo.GetEntitiesList()).Where(e => e.UserId == userId).FirstOrDefault();
+                var dailyKcalGoal = GetNormOfCalories();
                 if (dailyR != null)
                 {
+                    
                     if (DateTime.Now.Date != dailyR.Date)
                     {
                         dailyR = new DailyRatio()
                         {
-                            DailyKcalGoal = 0,
+                            DailyKcalGoal =await dailyKcalGoal,
                             Date = DateTime.Now.Date,
                             CcalAlreadyUsed = 0,
                             UserId = userId
@@ -62,7 +64,7 @@ namespace Project.Controllers
                 {
                     dailyR = new DailyRatio()
                     {
-                        DailyKcalGoal = 0,
+                        DailyKcalGoal = await dailyKcalGoal,
                         Date = DateTime.Now.Date,
                         CcalAlreadyUsed = 0,
                         UserId = userId
@@ -98,12 +100,12 @@ namespace Project.Controllers
                     var resp = await httpClient.GetStringAsync(openFoodDbURL);
 
                     var jObject = JObject.Parse(resp);
-                    var listJson = (string)jObject["products"];
-                    var listProdsToAdd = JsonConvert.DeserializeObject<List<JsonProduct>>(listJson);
-                    if (listProdsToAdd.Any())
+                    var listJson = jObject["products"].ToObject<List<JsonProduct>>();
+                    
+                    if (listJson.Any())
                     {
                         List<Food> foodToAddToLocalDb = new List<Food>();
-                        foreach (var prod in listProdsToAdd)
+                        foreach (var prod in listJson)
                         {
                             var prodToAdd = new Food()
                             {
@@ -198,6 +200,38 @@ namespace Project.Controllers
             }
 
             
+        }
+
+        public async Task<double> GetNormOfCalories()
+        {
+
+            var settings = await _settingsRepo.GetSettings(userId);
+            var uD//userDescription
+                = await _settingsRepo.GetUserDescription(userId);
+            var correctorIndx = 0;
+            switch (settings.GoalId)
+            {
+                case 1:
+                    correctorIndx = -500;
+                    break;
+                case 2:
+                    correctorIndx = 500;
+                    break;
+                case 3:
+                    break;
+                default:
+                    break;
+            }
+            double regularAmountOfKcal = (10 * uD.WeightKG) + (6.25 * uD.HeightCM) - (5 * uD.Age);
+            if (uD.GenderId == 1)
+            {
+                regularAmountOfKcal = (regularAmountOfKcal + 5) * 1.2;
+            }
+            else
+            {
+                regularAmountOfKcal = (regularAmountOfKcal - 161) * 1.2;
+            }
+            return regularAmountOfKcal - correctorIndx;
         }
     }
 }

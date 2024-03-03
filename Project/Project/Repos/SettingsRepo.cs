@@ -3,38 +3,13 @@ using Project.Models;
 
 namespace Project.Repos
 {
-    public class SettingsRepo: IKcalRepo<SettingsRepo>
+    public class SettingsRepo
     {
         private readonly KcalContext _context;
 
         public SettingsRepo(KcalContext context)
         {
             _context = context;
-        }
-
-        public Task AddEntities(List<SettingsRepo> entities)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task AddEntity(SettingsRepo entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task DeleteEntity(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<SettingsRepo>> GetEntitiesList()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<SettingsRepo> GetEntity(int id)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task< Settings> GetSettings(string userId)
@@ -62,9 +37,19 @@ namespace Project.Repos
             }
         }
 
-        public Task UpdateEntity(SettingsRepo entity)
+        public async Task AddSettings(Settings settings,UserDescription uD)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _context.Settings.Add(settings);
+                _context.UserDescriptions.Add(uD);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+
+            }
+           
         }
     }
 }

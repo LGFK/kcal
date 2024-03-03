@@ -16,9 +16,11 @@ namespace Project
             var connectionString = builder.Configuration.GetConnectionString("UserKcalContextConnection");
 
             builder.Services.AddDbContext<UserKcalContext>(options => options.UseSqlServer(connectionString));
+            builder.Services.AddScoped<UserManager<IdentityUser>>();
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<UserKcalContext>();
             builder.Services.AddScoped<FoodRepo>();
+            builder.Services.AddScoped<SettingsRepo>();
             builder.Services.AddSession(options =>
             {
                 
@@ -39,7 +41,7 @@ namespace Project
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
-
+            
             app.UseRouting();
             app.UseSession();
             app.UseAuthorization();

@@ -2,19 +2,22 @@
 using NuGet.Configuration;
 using Project.Data;
 using Project.Models;
+using Project.Repos;
+using Project.ViewModels;
 using Settings = Project.Models.Settings;
 
 namespace Project.Utilities
 {
-    public static class UserInfoContainerFactory
+    public class UserInfoContainerFactory
     {
+       
 
-        public static async Task< UserInfoContainer> GetUserInfoContainer(IdentityUser user, Settings settings, UserDescription uD)
+        public static async Task< UserViewModel> GetUserInfoContainer(IdentityUser user, Settings settings, UserDescription uD)
         {
             try
             {
 
-                var uContainer = new UserInfoContainer()
+                var uContainer = new UserViewModel()
                 {
                     UserDescription = uD,
                     Settings = settings,

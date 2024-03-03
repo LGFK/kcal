@@ -1,8 +1,9 @@
 ﻿using System.Configuration;
+using Project.Models;
 
-namespace Project.Models
+namespace Project.ViewModels
 {
-    public class UserInfoContainer
+    public class UserViewModel
     {
         public string Id { get; set; }
 
@@ -10,7 +11,7 @@ namespace Project.Models
 
         public string? Email { get; set; }
 
-        
+
 
         public UserDescription UserDescription { get; set; }
 

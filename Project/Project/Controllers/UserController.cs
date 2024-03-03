@@ -4,13 +4,14 @@ using Project.Data;
 using Project.Models;
 using Project.Repos;
 using Project.Utilities;
+using Project.ViewModels;
 using System.Security.Claims;
 
 namespace Project.Controllers
 {
     public class UserController : Controller
     {
-        UserInfoContainer _userInfoContainer;
+        
         UserManager<IdentityUser> _userManager;
         private readonly SettingsRepo _sR;
         
@@ -33,6 +34,7 @@ namespace Project.Controllers
                     Theme = true,
                     UserId = user.Id
                 };
+                
                 var uDescriptionToAdd = new UserDescription()
                 {
                     Age = 0,
@@ -41,10 +43,11 @@ namespace Project.Controllers
                     HeightCM = 0,
                     UserId = user.Id
                 };
-                _sR.AddSettings(settingsToAdd,uDescriptionToAdd);
+                await _sR.AddSettings(settingsToAdd,uDescriptionToAdd);
+                settings = await _sR.GetSettings(user.Id);
             }
             var uD =await _sR.GetUserDescription(user.Id);
-            _userInfoContainer = await UserInfoContainerFactory.GetUserInfoContainer(user, settings, uD);//это модель которую надо использовать во view
+            UserViewModel  _userInfoContainer = await UserInfoContainerFactory.GetUserInfoContainer(user, settings, uD);//это модель которую надо использовать во view;
             return View();
         }
     }
