@@ -1,0 +1,30 @@
+﻿@model IEnumerable<Project.Models.Food>
+
+@{
+    ViewData["Title"] = "SearchForProduct";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>SearchForProduct</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<div class="row">
+    @if(Model != null)
+    {
+        foreach(Food item in Model)
+        {
+            <div class="card" style="width: 18rem;">
+                <div class="card-header">@item.Name</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">@item.KcalPer100g</li>
+                    <li class="list-group-item">@item.Proteins</li>
+                    <li class="list-group-item">@item.Fats</li>
+                    <li class="list-group-item">@item.Carbohydrates</li>
+                </ul>
+            </div>
+        }
+    }
+</div>
