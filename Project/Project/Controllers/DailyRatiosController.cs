@@ -1,163 +1,197 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
 using Project.Models;
+using Project.Repos;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Project.Controllers
 {
     public class DailyRatiosController : Controller
     {
-        private readonly KcalContext _context;
+        private readonly FoodRepo fRepo;
+        private readonly RatioRepo ratioRepo;
+        
+        private string userId;
+        
 
-        public DailyRatiosController(KcalContext context)
+        public DailyRatiosController(FoodRepo fRepo, RatioRepo ratioRepo)
         {
-            _context = context;
+            this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            this.fRepo = fRepo;
+            this.ratioRepo = ratioRepo;
+            
+            
         }
-
-        // GET: DailyRatios
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-              return _context.DailyRatio != null ? 
-                          View(await _context.DailyRatio.ToListAsync()) :
-                          Problem("Entity set 'KcalContext.DailyRatio'  is null.");
-        }
-
-        // GET: DailyRatios/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.DailyRatio == null)
+            try
             {
-                return NotFound();
-            }
-
-            var dailyRatio = await _context.DailyRatio
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (dailyRatio == null)
-            {
-                return NotFound();
-            }
-
-            return View(dailyRatio);
-        }
-
-        // GET: DailyRatios/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: DailyRatios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Date,DailyKcalGoal,CcalAlreadyUsed,UserId")] DailyRatio dailyRatio)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(dailyRatio);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(dailyRatio);
-        }
-
-        // GET: DailyRatios/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null || _context.DailyRatio == null)
-            {
-                return NotFound();
-            }
-
-            var dailyRatio = await _context.DailyRatio.FindAsync(id);
-            if (dailyRatio == null)
-            {
-                return NotFound();
-            }
-            return View(dailyRatio);
-        }
-
-        // POST: DailyRatios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Date,DailyKcalGoal,CcalAlreadyUsed,UserId")] DailyRatio dailyRatio)
-        {
-            if (id != dailyRatio.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+                var dailyR = (await ratioRepo.GetEntitiesList()).Where(e => e.UserId == userId).FirstOrDefault();
+                if (dailyR != null)
                 {
-                    _context.Update(dailyRatio);
-                    await _context.SaveChangesAsync();
+                    if (DateTime.Now.Date != dailyR.Date)
+                    {
+                        dailyR = new DailyRatio()
+                        {
+                            DailyKcalGoal = 0,
+                            Date = DateTime.Now.Date,
+                            CcalAlreadyUsed = 0,
+                            UserId = userId
+                        };
+                        await ratioRepo.AddEntity(dailyR);
+                    }
+                   
                 }
-                catch (DbUpdateConcurrencyException)
+                else
                 {
-                    if (!DailyRatioExists(dailyRatio.Id))
+                    dailyR = new DailyRatio()
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                        DailyKcalGoal = 0,
+                        Date = DateTime.Now.Date,
+                        CcalAlreadyUsed = 0,
+                        UserId = userId
+                    };
+                    await ratioRepo.AddEntity(dailyR);
                 }
-                return RedirectToAction(nameof(Index));
+                return View(dailyR);
             }
-            return View(dailyRatio);
+            catch (Exception ex)
+            {
+                return View(new DailyRatio()
+                {
+                    DailyKcalGoal = 0,
+                    Date = DateTime.Now.Date,
+                    CcalAlreadyUsed = 0,
+                    UserId = "ERROR/"+ex.Message
+                });
+
+            }
+
         }
 
-        // GET: DailyRatios/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> SearchForProduct(string productName)
         {
-            if (id == null || _context.DailyRatio == null)
+            try
             {
-                return NotFound();
-            }
+                var openFoodDbURL = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={productName}&search_simple=1&action=process&json=1&fields=product_name,carbohydrates_100g,fat_100g,proteins_100g,energy-kcal_100g";
+                var food = (await fRepo.GetEntitiesList()).Where(f=>f.Name.ToLower().Contains(productName.ToLower())).ToList();
+                if (food.Count() < 5 || !food.Any())
+                {
+                    HttpClient httpClient = new HttpClient();
 
-            var dailyRatio = await _context.DailyRatio
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (dailyRatio == null)
+                    var resp = await httpClient.GetStringAsync(openFoodDbURL);
+
+                    var jObject = JObject.Parse(resp);
+                    var listJson = (string)jObject["products"];
+                    var listProdsToAdd = JsonConvert.DeserializeObject<List<JsonProduct>>(listJson);
+                    if (listProdsToAdd.Any())
+                    {
+                        List<Food> foodToAddToLocalDb = new List<Food>();
+                        foreach (var prod in listProdsToAdd)
+                        {
+                            var prodToAdd = new Food()
+                            {
+                                KcalPer100g = prod.energykcal_100g,
+                                Carbohydrates = prod.carbohydrates_100g,
+                                Fats = prod.fat_100g,
+                                Name = prod.product_name,
+                                Proteins = prod.proteins_100g
+                            };
+                            foodToAddToLocalDb.Add(prodToAdd);
+
+                        }
+                        if (foodToAddToLocalDb.Any())
+                        {
+                            await fRepo.AddEntities(foodToAddToLocalDb);
+                        }
+                        food = (await fRepo.GetEntitiesList()).Where(f => f.Name == productName).ToList();
+
+                    }
+
+                }
+                else
+                {
+                    
+                }
+                return null; //надо дописать что возвращает view View(food)
+
+
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                return null;
             }
-
-            return View(dailyRatio);
         }
-
-        // POST: DailyRatios/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> EatDishesInCart(int id, double weight)
         {
-            if (_context.DailyRatio == null)
+            try
             {
-                return Problem("Entity set 'KcalContext.DailyRatio'  is null.");
+                var currDailyRatio = await ratioRepo.GetCurrentDailyRatio(userId);
+
+                var eatenFoodToAdd = new EatenFood()
+                {
+                    DailyRatioId = currDailyRatio.Id,
+                    DishId = id,
+                    Weight = weight
+                };
             }
-            var dailyRatio = await _context.DailyRatio.FindAsync(id);
-            if (dailyRatio != null)
+            catch(Exception ex)
             {
-                _context.DailyRatio.Remove(dailyRatio);
+
             }
             
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return View("Index");
         }
 
-        private bool DailyRatioExists(int id)
-        {
-          return (_context.DailyRatio?.Any(e => e.Id == id)).GetValueOrDefault();
+      public async Task<IActionResult> AddToEatenFoodCart(int productId,double weight)
+      {
+            try
+            {
+                var foodToEat = (await fRepo.GetEntitiesList()).Where(f => f.Id == productId).FirstOrDefault();
+                List<EatenFood> cart = null;
+                var cartStr = HttpContext.Session.GetString("EatenFoodCart");
+                if (!string.IsNullOrEmpty(cartStr))
+                {
+                    cart = JsonConvert.DeserializeObject<List<EatenFood>>(cartStr);
+                }
+
+                else
+                {
+                    cart = new List<EatenFood>();
+                }
+
+
+                var eatenFood = new EatenFood()
+                {
+                    DailyRatioId = 0,
+                    DishId = productId,
+                    Weight = weight
+
+                };
+
+                cart?.Add(eatenFood);
+
+
+                HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+                return RedirectToAction("Index");
+            }
+            catch(Exception ex)
+            {
+                return null; //придумать механизм с exceptions 
+            }
+
+            
         }
     }
 }

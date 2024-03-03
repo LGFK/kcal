@@ -11,6 +11,6 @@ namespace Project.Models
         public double DailyKcalGoal { get; set; }
         public double CcalAlreadyUsed { get; set; }
         [ForeignKey("FK_USER_ID")]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
     }
 }
