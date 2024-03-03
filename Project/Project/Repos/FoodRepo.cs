@@ -100,6 +100,7 @@ namespace Project.Repos
         public async Task AddEntities(List<Food> entities)
         {
             _context.AddRangeAsync(entities);
+            _context.SaveChanges();
         }
     }
 }

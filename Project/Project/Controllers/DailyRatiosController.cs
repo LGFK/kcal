@@ -25,7 +25,6 @@ namespace Project.Controllers
 
         public DailyRatiosController(FoodRepo fRepo, RatioRepo ratioRepo)
         {
-            this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             this.fRepo = fRepo;
             this.ratioRepo = ratioRepo;
             
@@ -79,10 +78,11 @@ namespace Project.Controllers
 
         }
 
-        public async Task<IActionResult> SearchForProduct(string productName)
+        public async Task<IActionResult> SearchForProduct(string productName = "nutella")
         {
             try
             {
+                this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var openFoodDbURL = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={productName}&search_simple=1&action=process&json=1&fields=product_name,carbohydrates_100g,fat_100g,proteins_100g,energy-kcal_100g";
                 var food = (await fRepo.GetEntitiesList()).Where(f=>f.Name.ToLower().Contains(productName.ToLower())).ToList();
                 if (food.Count() < 5 || !food.Any())
@@ -92,12 +92,12 @@ namespace Project.Controllers
                     var resp = await httpClient.GetStringAsync(openFoodDbURL);
 
                     var jObject = JObject.Parse(resp);
-                    var listJson = (string)jObject["products"];
-                    var listProdsToAdd = JsonConvert.DeserializeObject<List<JsonProduct>>(listJson);
-                    if (listProdsToAdd.Any())
+                    var listJson = jObject["products"].ToObject<List<JsonProduct>>();
+
+                    if (listJson.Any())
                     {
                         List<Food> foodToAddToLocalDb = new List<Food>();
-                        foreach (var prod in listProdsToAdd)
+                        foreach (var prod in listJson)
                         {
                             var prodToAdd = new Food()
                             {
@@ -121,9 +121,16 @@ namespace Project.Controllers
                 }
                 else
                 {
-                    
+                    //var prodToAdd = new Food()
+                    //{
+                    //    KcalPer100g = prod.energykcal_100g,
+                    //    Carbohydrates = prod.carbohydrates_100g,
+                    //    Fats = prod.fat_100g,
+                    //    Name = prod.product_name,
+                    //    Proteins = prod.proteins_100g
+                    //};
                 }
-                return null; //надо дописать что возвращает view View(food)
+                return View("SearchForProduct", food); //надо дописать что возвращает view View(food)
 
 
             }
