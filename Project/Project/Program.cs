@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
 using Microsoft.Extensions.DependencyInjection;
+using Project.Repos;
+
 namespace Project
 {
     public class Program
@@ -11,12 +13,21 @@ namespace Project
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddDbContext<KcalContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("KcalContext")));
-            var connectionString = builder.Configuration.GetConnectionString("UserKcalContextConnection") ?? throw new InvalidOperationException("Connection string 'UserKcalContextConnection' not found.");
+            var connectionString = builder.Configuration.GetConnectionString("UserKcalContextConnection");
 
             builder.Services.AddDbContext<UserKcalContext>(options => options.UseSqlServer(connectionString));
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<UserKcalContext>();
+            builder.Services.AddScoped<FoodRepo>();
+            builder.Services.AddSession(options =>
+            {
+                
+                options.IdleTimeout = TimeSpan.FromMinutes(100);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
 
+            });
+            builder.Services.AddScoped<RatioRepo>();
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -30,7 +41,7 @@ namespace Project
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseSession();
             app.UseAuthorization();
             app.MapRazorPages();
             app.MapControllerRoute(
