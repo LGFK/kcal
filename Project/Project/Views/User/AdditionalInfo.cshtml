@@ -1,0 +1,159 @@
+﻿@page
+@* @model Settings *@
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Action" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <h3>Goal</h3>
+                <select class="form-select" style="width:12rem;">
+                    <option selected>Goal</option>
+                    <option value="1">Lose Weight</option>
+                    <option value="2">Maintain Weight</option>
+                    <option value="3">Gain Weight</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="range" min="50" max="250" step="1" value="170"/>
+            </div>
+            <div class="form-group">
+                <input type="range" min="30" max="200"  value="70"/>
+            </div>
+            <div class="form-group">
+            </div>
+            <div class="form-group">
+                <h5>Sex</h5>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Radio" id="Radio1">
+                    <label class="form-check-label" for="Radio1">
+                        Male
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Radio" id="Radio2" checked>
+                    <label class="form-check-label" for="Radio2">
+                        Female
+                    </label>
+                </div>
+            </div>
+            
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col mx-md-n5">
+        <div class="col border border-dark d-flex flex-column">
+            
+        </div>
+        <div class="col border border-dark d-flex flex-column">
+            <div class="form-group">
+                
+                <h5>Date of birth</h5>
+                <div class="form-outline">
+                    <input type="date" class="form-control" />
+                </div>
+                <h5>Height</h5>
+                div class="form-check">
+                <input class="form-check-input" type="radio" name="Radio" id="Radio1">
+                <label class="form-check-label" for="Radio1">
+                    Male
+                </label>
+            </div>
+            </div>
+            
+        </div>
+
+        <div class="row">
+            <div class="col p-3 border border-dark d-flex flex-column">
+                <select class="form-select" style="width:12rem;">
+                    <option selected>Goal</option>
+                    <option value="1">Lose Weight</option>
+                    <option value="2">Maintain Weight</option>
+                    <option value="3">Gain Weight</option>
+                </select>
+                @* <div class="form-group">
+                    <div class="row">
+                        <h5 class="col-form-label col-sm-2 pt-0">Activity</h5>
+                        <div class="col-sm-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="option1">
+                                <label class="form-check-label" for="gridRadios1">
+                                    Not Very Active
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="option2">
+                                <label class="form-check-label" for="gridRadios2">
+                                    Lightly Active
+                                </label>
+                            </div>
+                            <div class="form-check disabled">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios3" value="option3" >
+                                <label class="form-check-label" for="gridRadios3">
+                                    Active
+                                </label>
+                            </div>
+                            <div class="form-check disabled">
+                                <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios4" value="option4" >
+                                <label class="form-check-label" for="gridRadios4">
+                                    Very Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div> *@
+            @* <button type="button" class="btn btn-outline-info" style="margin-top:10px;">Lose Weight</button>
+            <button type="button" class="btn btn-outline-info" style="margin-top:10px;">Maintain Weight</button>
+            <button type="button" class="btn btn-outline-info" style="margin-top:10px;">Gain Weight</button> *@
+                <div class="form-group" style="margin-top:15px;">
+                    <div class="row">
+                        <h5 class="col-form-label col-sm-2 pt-0">Sex</h5>
+                        <div class="col-sm-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="radio" id="radio1" value="option1">
+                                <label class="form-check-label" for="radio1">
+                                    Male
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="radio" id="radio2" value="option2">
+                                <label class="form-check-label" for="radio2">
+                                    Female
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border border-info">
+                    <h5>Sex</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="Radio" id="Radio1">
+                        <label class="form-check-label" for="Radio1">
+                            Male
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="Radio" id="Radio2" checked>
+                        <label class="form-check-label" for="Radio2">
+                            Female
+                        </label>
+                    </div>
+                    <h5>Age</h5>
+                    <div class="form-outline">
+                        <input type="tel" id="typePhone" class="form-control" />
+                        <label class="form-label" for="typePhone">Phone number input</label>
+                    </div>
+                    <input type="range" min="60" max="230" step="1" value="150"/>
+                </div>
+            </div>
+            
+        
+    </div>
+</div>
