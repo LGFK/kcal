@@ -17,16 +17,22 @@ namespace Project.Controllers
 {
     public class DailyRatiosController : Controller
     {
-        private readonly FoodRepo fRepo;
-        private readonly RatioRepo ratioRepo;
-        
+        private readonly FoodRepo _fRepo;
+        private readonly RatioRepo _ratioRepo;
+        private readonly SettingsRepo _settingsRepo;
         private string userId;
         
+        
 
-        public DailyRatiosController(FoodRepo fRepo, RatioRepo ratioRepo)
+        public DailyRatiosController(FoodRepo fRepo, RatioRepo ratioRepo,SettingsRepo settingsRepo)
         {
-            this.fRepo = fRepo;
-            this.ratioRepo = ratioRepo;
+           
+            this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            this._fRepo = fRepo;
+            this._ratioRepo = ratioRepo;
+            this._settingsRepo = settingsRepo;
+            
+
             
             
         }
@@ -35,19 +41,22 @@ namespace Project.Controllers
         {
             try
             {
-                var dailyR = (await ratioRepo.GetEntitiesList()).Where(e => e.UserId == userId).FirstOrDefault();
+                
+                var dailyR = (await _ratioRepo.GetEntitiesList()).Where(e => e.UserId == userId).FirstOrDefault();
+                var dailyKcalGoal = GetNormOfCalories();
                 if (dailyR != null)
                 {
+                    
                     if (DateTime.Now.Date != dailyR.Date)
                     {
                         dailyR = new DailyRatio()
                         {
-                            DailyKcalGoal = 0,
+                            DailyKcalGoal =await dailyKcalGoal,
                             Date = DateTime.Now.Date,
                             CcalAlreadyUsed = 0,
                             UserId = userId
                         };
-                        await ratioRepo.AddEntity(dailyR);
+                        await _ratioRepo.AddEntity(dailyR);
                     }
                    
                 }
@@ -55,12 +64,12 @@ namespace Project.Controllers
                 {
                     dailyR = new DailyRatio()
                     {
-                        DailyKcalGoal = 0,
+                        DailyKcalGoal = await dailyKcalGoal,
                         Date = DateTime.Now.Date,
                         CcalAlreadyUsed = 0,
                         UserId = userId
                     };
-                    await ratioRepo.AddEntity(dailyR);
+                    await _ratioRepo.AddEntity(dailyR);
                 }
                 return View(dailyR);
             }
@@ -84,7 +93,7 @@ namespace Project.Controllers
             {
                 this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var openFoodDbURL = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={productName}&search_simple=1&action=process&json=1&fields=product_name,carbohydrates_100g,fat_100g,proteins_100g,energy-kcal_100g";
-                var food = (await fRepo.GetEntitiesList()).Where(f=>f.Name.ToLower().Contains(productName.ToLower())).ToList();
+                var food = (await _fRepo.GetEntitiesList()).Where(f=>f.Name.ToLower().Contains(productName.ToLower())).ToList();
                 if (food.Count() < 5 || !food.Any())
                 {
                     HttpClient httpClient = new HttpClient();
@@ -93,7 +102,7 @@ namespace Project.Controllers
 
                     var jObject = JObject.Parse(resp);
                     var listJson = jObject["products"].ToObject<List<JsonProduct>>();
-
+                    
                     if (listJson.Any())
                     {
                         List<Food> foodToAddToLocalDb = new List<Food>();
@@ -112,9 +121,9 @@ namespace Project.Controllers
                         }
                         if (foodToAddToLocalDb.Any())
                         {
-                            await fRepo.AddEntities(foodToAddToLocalDb);
+                            await _fRepo.AddEntities(foodToAddToLocalDb);
                         }
-                        food = (await fRepo.GetEntitiesList()).Where(f => f.Name == productName).ToList();
+                        food = (await _fRepo.GetEntitiesList()).Where(f => f.Name == productName).ToList();
 
                     }
 
@@ -143,7 +152,7 @@ namespace Project.Controllers
         {
             try
             {
-                var currDailyRatio = await ratioRepo.GetCurrentDailyRatio(userId);
+                var currDailyRatio = await _ratioRepo.GetCurrentDailyRatio(userId);
 
                 var eatenFoodToAdd = new EatenFood()
                 {
@@ -165,7 +174,7 @@ namespace Project.Controllers
       {
             try
             {
-                var foodToEat = (await fRepo.GetEntitiesList()).Where(f => f.Id == productId).FirstOrDefault();
+                var foodToEat = (await _fRepo.GetEntitiesList()).Where(f => f.Id == productId).FirstOrDefault();
                 List<EatenFood> cart = null;
                 var cartStr = HttpContext.Session.GetString("EatenFoodCart");
                 if (!string.IsNullOrEmpty(cartStr))
@@ -199,6 +208,38 @@ namespace Project.Controllers
             }
 
             
+        }
+
+        public async Task<double> GetNormOfCalories()
+        {
+
+            var settings = await _settingsRepo.GetSettings(userId);
+            var uD//userDescription
+                = await _settingsRepo.GetUserDescription(userId);
+            var correctorIndx = 0;
+            switch (settings.GoalId)
+            {
+                case 1:
+                    correctorIndx = -500;
+                    break;
+                case 2:
+                    correctorIndx = 500;
+                    break;
+                case 3:
+                    break;
+                default:
+                    break;
+            }
+            double regularAmountOfKcal = (10 * uD.WeightKG) + (6.25 * uD.HeightCM) - (5 * uD.Age);
+            if (uD.GenderId == 1)
+            {
+                regularAmountOfKcal = (regularAmountOfKcal + 5) * 1.2;
+            }
+            else
+            {
+                regularAmountOfKcal = (regularAmountOfKcal - 161) * 1.2;
+            }
+            return regularAmountOfKcal - correctorIndx;
         }
     }
 }

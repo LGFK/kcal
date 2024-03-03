@@ -8,7 +8,7 @@ namespace Project.Models
         [Key]
         public int Id { get; set; }
         [ForeignKey("FK_USER_ID")]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         public int HeightCM { get; set; }
         public int WeightKG { get; set; }
         public int Age { get; set; }

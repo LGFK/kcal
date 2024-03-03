@@ -8,7 +8,7 @@ namespace Project.Models
         [Key]
         public int Id { get; set; }
         [ForeignKey("FK_USER_ID")]
-        public int UserId { get; set; }
+        public string UserId { get; set; }
         [ForeignKey("FK_GOAL_ID")]
         public int GoalId { get; set; }
         public bool? EmailNotifications { get; set; }
