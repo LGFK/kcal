@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "OVSVcT+LqJxuBYhbvtJQcz8iu0BQPFLuYFEgrL1YvHTlBorcNY7W2mQo8Jw62drr2zjXMgSq5FVh78JnwO2oQQ==",
+  "dgSpecHash": "8f2gpHj6YAU3GvIgErRD2r0J5z43/3IG36prQoiNXWeOjxSCG/VAnnP/K98/9jetRJ+AFRFzov340pua3pX3Ow==",
   "success": true,
-  "projectFilePath": "C:\\Users\\gamle\\source\\repos\\kcal\\kcal\\Project\\Project\\Project.csproj",
+  "projectFilePath": "C:\\Users\\gamle\\source\\repos\\kcal\\Project\\Project\\Project.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\gamle\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\gamle\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",
