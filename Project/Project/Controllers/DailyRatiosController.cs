@@ -27,7 +27,6 @@ namespace Project.Controllers
         public DailyRatiosController(FoodRepo fRepo, RatioRepo ratioRepo,SettingsRepo settingsRepo)
         {
            
-            this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             this._fRepo = fRepo;
             this._ratioRepo = ratioRepo;
             this._settingsRepo = settingsRepo;
@@ -148,22 +147,33 @@ namespace Project.Controllers
                 return null;
             }
         }
-        public async Task<IActionResult> EatDishesInCart(int id, double weight)
+        
+        public async Task<IActionResult> EatDishesInCart()
         {
             try
             {
                 var currDailyRatio = await _ratioRepo.GetCurrentDailyRatio(userId);
-
-                var eatenFoodToAdd = new EatenFood()
+                var dishesInCartStr = HttpContext.Session.GetString("EatenFoodCart");
+                List<EatenFood> dishesInCart = null;
+                if (!string.IsNullOrEmpty(dishesInCartStr))
                 {
-                    DailyRatioId = currDailyRatio.Id,
-                    DishId = id,
-                    Weight = weight
-                };
+                    dishesInCart = JsonConvert.DeserializeObject<List<EatenFood>>(dishesInCartStr);
+                }
+               
+                if (dishesInCart == null)
+                {
+                    throw new Exception("No Dishes In cart");
+                }
+                foreach (var dish in dishesInCart)
+                {
+                    _fRepo.AddEatenFood(dish);
+                }
+                dishesInCart.Clear();
+                HttpContext.Session.SetString("EatenFood", JsonConvert.SerializeObject(dishesInCart));
             }
             catch(Exception ex)
             {
-
+                return null;
             }
             
 
@@ -199,7 +209,7 @@ namespace Project.Controllers
                 cart?.Add(eatenFood);
 
 
-                HttpContext.Session.SetString("Cart", JsonConvert.SerializeObject(cart));
+                HttpContext.Session.SetString("EatenFoodCart", JsonConvert.SerializeObject(cart));
                 return RedirectToAction("Index");
             }
             catch(Exception ex)

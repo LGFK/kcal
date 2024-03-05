@@ -71,7 +71,7 @@ namespace Project.Repos
 
         }
 
-        public async Task AddEtenFood(EatenFood eFood)
+        public async Task AddEatenFood(EatenFood eFood)
         {
             try
             {
