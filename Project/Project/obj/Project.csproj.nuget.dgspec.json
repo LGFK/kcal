@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\gamle\\source\\repos\\kcal\\kcal\\Project\\Project\\Project.csproj": {}
+    "C:\\Users\\gamle\\source\\repos\\kcal\\Project\\Project\\Project.csproj": {}
   },
   "projects": {
-    "C:\\Users\\gamle\\source\\repos\\kcal\\kcal\\Project\\Project\\Project.csproj": {
+    "C:\\Users\\gamle\\source\\repos\\kcal\\Project\\Project\\Project.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\gamle\\source\\repos\\kcal\\kcal\\Project\\Project\\Project.csproj",
+        "projectUniqueName": "C:\\Users\\gamle\\source\\repos\\kcal\\Project\\Project\\Project.csproj",
         "projectName": "Project",
-        "projectPath": "C:\\Users\\gamle\\source\\repos\\kcal\\kcal\\Project\\Project\\Project.csproj",
+        "projectPath": "C:\\Users\\gamle\\source\\repos\\kcal\\Project\\Project\\Project.csproj",
         "packagesPath": "C:\\Users\\gamle\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\gamle\\source\\repos\\kcal\\kcal\\Project\\Project\\obj\\",
+        "outputPath": "C:\\Users\\gamle\\source\\repos\\kcal\\Project\\Project\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
