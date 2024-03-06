@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Project.Data;
 using Project.Models;
 using Project.Repos;
@@ -41,7 +42,7 @@ namespace Project.Controllers
 
                 var uDescriptionToAdd = new UserDescription()
                 {
-                    Age = 0,
+                    Age = 18,
                     WeightKG = 70,
                     GenderId = 1,
                     HeightCM = 170,
@@ -69,6 +70,7 @@ namespace Project.Controllers
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
             _sR.UpdateDescription(user.Id, userSettingsFromForm.UserDescription);
             _sR.UpdateSettings(user.Id, userSettingsFromForm.Settings);
+            HttpContext.Session.SetString("AddedInfo", "");
             return RedirectToAction();
         }
     }

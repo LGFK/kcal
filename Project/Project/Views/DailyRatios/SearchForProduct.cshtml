@@ -7,10 +7,6 @@
 
 <h1>SearchForProduct</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-
 <div class="row">
 
     <div class="input-group ">
@@ -25,19 +21,74 @@
         
     </div>
 
-    @if(Model != null)
-    {
-        foreach(Food item in Model)
-        {
-            <div class="card" style="width: 18rem;">
-                <div class="card-header">@item.Name</div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">@item.KcalPer100g</li>
-                    <li class="list-group-item">@item.Proteins</li>
-                    <li class="list-group-item">@item.Fats</li>
-                    <li class="list-group-item">@item.Carbohydrates</li>
-                </ul>
-            </div>
-        }
-    }
+   
+   
 </div>
+
+@if (Model != null)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">KcalPer100g</th>
+                <th scope="col">Proteins</th>
+                <th scope="col">Fats</th>
+                <th scope="col">Carbohydrates</th>
+                <th scope="col">Weight</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+           
+                @foreach (Food item in Model)
+                {
+                <tr>
+                    <td scope="row">@item.Name</td>
+                    <td >@item.KcalPer100g</td>
+                    <td >@item.Proteins</td>
+                    <td>@item.Fats</td>
+                    <td>@item.Carbohydrates</td>
+                    <form asp-action="AddToEatenFoodCart" enctype="multipart/form-data" method="post">
+                        <input type="text" asp-for="@item.Id" name="productId" style="display:none;" />
+                    <td><input required type="text" class="form-control" pattern="^\d*([,]\d{0,2})?$" value="0" style="width:100px;" name="weight" /></td>
+                        <td><button type="submit" class="btn btn-sm btn-success">Add</button></td>
+                    </form>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@* 
+<div class="container ">
+    <div class="row g-3">
+        @if (Model != null)
+        {
+            foreach (Food item in Model)
+            {
+                <div class="col">
+
+                <div class="card" style="width: 18rem;">
+                    <div class="card-header">@item.Name</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">@item.KcalPer100g</li>
+                        <li class="list-group-item">@item.Proteins</li>
+                        <li class="list-group-item">@item.Fats</li>
+                        <li class="list-group-item">@item.Carbohydrates</li>
+                        <li class="list-group-item">
+                            <div class="form-group row">
+                                <form asp-action="AddToEatenFoodCart" method="post">
+                                    <input required type="number" class="form-control" min="0" max="99" value="0" style="width:100px;" name="weight" step="any" />
+                                    <button type="submit" class="btn btn-sm btn-success">Add</button>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+ *@

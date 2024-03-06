@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Project.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Project.Repos;
+using Project.Utilities;
 
 namespace Project
 {
@@ -17,8 +18,10 @@ namespace Project
 
             builder.Services.AddDbContext<UserKcalContext>(options => options.UseSqlServer(connectionString));
             builder.Services.AddScoped<UserManager<IdentityUser>>();
+            builder.Services.AddScoped<ContextFactory>();
 
-            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<UserKcalContext>();
+
+        builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<UserKcalContext>();
             builder.Services.AddScoped<FoodRepo>();
             builder.Services.AddScoped<SettingsRepo>();
             builder.Services.AddSession(options =>
