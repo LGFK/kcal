@@ -86,60 +86,63 @@ namespace Project.Controllers
 
         }
 
-        public async Task<IActionResult> SearchForProduct(string productName = "nutella")
+        public async Task<IActionResult> SearchForProduct(string productName = "")
         {
             try
             {
-                this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var openFoodDbURL = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={productName}&search_simple=1&action=process&json=1&fields=product_name,carbohydrates_100g,fat_100g,proteins_100g,energy-kcal_100g";
-                var food = (await _fRepo.GetEntitiesList()).Where(f=>f.Name.ToLower().Contains(productName.ToLower())).ToList();
-                if (food.Count() < 5 || !food.Any())
+                if (!string.IsNullOrEmpty(productName))
                 {
-                    HttpClient httpClient = new HttpClient();
-
-                    var resp = await httpClient.GetStringAsync(openFoodDbURL);
-
-                    var jObject = JObject.Parse(resp);
-                    var listJson = jObject["products"].ToObject<List<JsonProduct>>();
-                    
-                    if (listJson.Any())
+                    this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var openFoodDbURL = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={productName}&search_simple=1&action=process&json=1&fields=product_name,carbohydrates_100g,fat_100g,proteins_100g,energy-kcal_100g";
+                    var food = (await _fRepo.GetEntitiesList()).Where(f => f.Name.ToLower().Contains(productName.ToLower())).ToList();
+                    if (food.Count() < 5 || !food.Any())
                     {
-                        List<Food> foodToAddToLocalDb = new List<Food>();
-                        foreach (var prod in listJson)
+                        HttpClient httpClient = new HttpClient();
+
+                        var resp = await httpClient.GetStringAsync(openFoodDbURL);
+
+                        var jObject = JObject.Parse(resp);
+                        var listJson = jObject["products"].ToObject<List<JsonProduct>>();
+
+                        if (listJson.Any())
                         {
-                            var prodToAdd = new Food()
+                            List<Food> foodToAddToLocalDb = new List<Food>();
+                            foreach (var prod in listJson)
                             {
-                                KcalPer100g = prod.energykcal_100g,
-                                Carbohydrates = prod.carbohydrates_100g,
-                                Fats = prod.fat_100g,
-                                Name = prod.product_name,
-                                Proteins = prod.proteins_100g
-                            };
-                            foodToAddToLocalDb.Add(prodToAdd);
+                                var prodToAdd = new Food()
+                                {
+                                    KcalPer100g = prod.energykcal_100g,
+                                    Carbohydrates = prod.carbohydrates_100g,
+                                    Fats = prod.fat_100g,
+                                    Name = prod.product_name,
+                                    Proteins = prod.proteins_100g
+                                };
+                                foodToAddToLocalDb.Add(prodToAdd);
+
+                            }
+                            if (foodToAddToLocalDb.Any())
+                            {
+                                await _fRepo.AddEntities(foodToAddToLocalDb);
+                            }
+                            food = (await _fRepo.GetEntitiesList()).Where(f => f.Name == productName).ToList();
 
                         }
-                        if (foodToAddToLocalDb.Any())
-                        {
-                            await _fRepo.AddEntities(foodToAddToLocalDb);
-                        }
-                        food = (await _fRepo.GetEntitiesList()).Where(f => f.Name == productName).ToList();
 
                     }
-
+                    else
+                    {
+                        //var prodToAdd = new Food()
+                        //{
+                        //    KcalPer100g = prod.energykcal_100g,
+                        //    Carbohydrates = prod.carbohydrates_100g,
+                        //    Fats = prod.fat_100g,
+                        //    Name = prod.product_name,
+                        //    Proteins = prod.proteins_100g
+                        //};
+                    }
+                    return View("SearchForProduct", food); //надо дописать что возвращает view View(food)
                 }
-                else
-                {
-                    //var prodToAdd = new Food()
-                    //{
-                    //    KcalPer100g = prod.energykcal_100g,
-                    //    Carbohydrates = prod.carbohydrates_100g,
-                    //    Fats = prod.fat_100g,
-                    //    Name = prod.product_name,
-                    //    Proteins = prod.proteins_100g
-                    //};
-                }
-                return View("SearchForProduct", food); //надо дописать что возвращает view View(food)
-
+                return View();
 
             }
             catch (Exception ex)
