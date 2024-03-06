@@ -1,0 +1,29 @@
+﻿@model Project.Models.DailyRatio
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Daily Ratio</h1>
+
+<div class="card" style="width: 18rem;">
+    <div class="card-header">@Model.UserId</div>
+    <ul class="list-group list-group-flush">
+        @if (Model.DailyKcalGoal <= Model.CcalAlreadyUsed)
+        {
+            <li class="list-group-item bg-danger text-white">@Model.CcalAlreadyUsed</li>
+        }
+        else
+        {
+            <li class="list-group-item bg-success text-white">@Model.CcalAlreadyUsed</li>
+        }
+
+        <li class="list-group-item">@Model.DailyKcalGoal</li>
+        <li class="list-group-item">@Model.Date</li>
+        <li class="list-group-item">@Model.Id</li>
+        <form asp-action="EatDishesInCart" method="post">
+            <button type="submit" class="btn btn-sm btn-primary">Eat</button>
+        </form>
+    </ul>
+</div>

@@ -1,15 +1,17 @@
 ﻿using Project.Data;
 using Project.Models;
+using Project.Utilities;
 
 namespace Project.Repos
 {
     public class FoodRepo:IKcalRepo<Food>
     {
-        private readonly KcalContext _context;
-
-        public FoodRepo(KcalContext context)
+        private readonly ContextFactory _contextF;
+        KcalContext _context;
+        public FoodRepo(ContextFactory contextF)
         {
-            _context = context;
+            _contextF = contextF;
+            _context = _contextF.CreateContext();
         }
         public async Task<Food> GetEntity(int id)
         {

@@ -12,6 +12,7 @@ using Project.Models;
 using Project.Repos;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.ComponentModel;
 
 namespace Project.Controllers
 {
@@ -40,7 +41,7 @@ namespace Project.Controllers
         {
             try
             {
-                
+                this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var dailyR = (await _ratioRepo.GetEntitiesList()).Where(e => e.UserId == userId).FirstOrDefault();
                 var dailyKcalGoal = GetNormOfCalories();
                 if (dailyR != null)
@@ -109,17 +110,17 @@ namespace Project.Controllers
                             List<Food> foodToAddToLocalDb = new List<Food>();
                             foreach (var prod in listJson)
                             {
-
-                                var prodToAdd = new Food()
+                                if (!String.IsNullOrEmpty(prod.product_name))
                                 {
+                                    var prodToAdd = new Food()
+                                    {
                                     KcalPer100g = prod.energykcal_100g,
                                     Carbohydrates = prod.carbohydrates_100g,
                                     Fats = prod.fat_100g,
                                     Name = prod.product_name,
                                     Proteins = prod.proteins_100g
-                                };
-                                if(!String.IsNullOrEmpty(prodToAdd.Name))
-                                {
+                                    };
+                                
                                     foodToAddToLocalDb.Add(prodToAdd);
                                 }
                             }
@@ -133,7 +134,7 @@ namespace Project.Controllers
 
                     }
                    
-                    return View("SearchForProduct", food); //надо дописать что возвращает view View(food)
+                    return View("SearchForProduct", food); 
                 }
                 return View();
 
@@ -143,11 +144,13 @@ namespace Project.Controllers
                 return null;
             }
         }
-        
+
+        [HttpPost]
         public async Task<IActionResult> EatDishesInCart()
         {
             try
             {
+                this.userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var currDailyRatio = await _ratioRepo.GetCurrentDailyRatio(userId);
                 var dishesInCartStr = HttpContext.Session.GetString("EatenFoodCart");
                 List<EatenFood> dishesInCart = null;
@@ -162,22 +165,26 @@ namespace Project.Controllers
                 }
                 foreach (var dish in dishesInCart)
                 {
-                    _fRepo.AddEatenFood(dish);
+                    dish.DailyRatioId = currDailyRatio.Id;
+                    await _fRepo.AddEatenFood(dish);
+                    var food =  (await _fRepo.GetEntity(dish.DishId));
+                    currDailyRatio.CcalAlreadyUsed += food.KcalPer100g / 100 * dish.Weight;
                 }
-                dishesInCart.Clear();
-                HttpContext.Session.SetString("EatenFood", JsonConvert.SerializeObject(dishesInCart));
+                _ratioRepo.UpdateEntity(currDailyRatio);
+                HttpContext.Session.SetString("EatenFoodCart", JsonConvert.SerializeObject(new List<EatenFood>()));
+                return View("Index",currDailyRatio);
             }
             catch(Exception ex)
             {
                 return null;
             }
-            
-
-            return View("Index");
         }
 
-      public async Task<IActionResult> AddToEatenFoodCart(int productId,double weight)
+        [HttpPost]
+      public async Task<IActionResult> AddToEatenFoodCart(int productId,string weight)
       {
+
+            Double.TryParse(weight, out var w);
             try
             {
                 var foodToEat = (await _fRepo.GetEntitiesList()).Where(f => f.Id == productId).FirstOrDefault();
@@ -198,7 +205,7 @@ namespace Project.Controllers
                 {
                     DailyRatioId = 0,
                     DishId = productId,
-                    Weight = weight
+                    Weight = w
 
                 };
 
@@ -218,7 +225,6 @@ namespace Project.Controllers
 
         public async Task<double> GetNormOfCalories()
         {
-
             var settings = await _settingsRepo.GetSettings(userId);
             var uD//userDescription
                 = await _settingsRepo.GetUserDescription(userId);
