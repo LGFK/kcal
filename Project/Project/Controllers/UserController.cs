@@ -59,15 +59,16 @@ namespace Project.Controllers
         public async Task<IActionResult> Index()
         {
            
-            var vm = CreateUserViewModel();
+            var vm = await CreateUserViewModel();
             return View("AdditionalInfo",vm);
         }
         [HttpPost]
         public async Task<IActionResult> Index(UserViewModel userSettingsFromForm)
         {
-
-            _sR.UpdateDescription(userSettingsFromForm.Id,userSettingsFromForm.UserDescription);
-            _sR.UpdateSettings(userSettingsFromForm.Id,userSettingsFromForm.Settings);
+            var a = userSettingsFromForm.UserDescription.GenderId;
+            var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            _sR.UpdateDescription(user.Id, userSettingsFromForm.UserDescription);
+            _sR.UpdateSettings(user.Id, userSettingsFromForm.Settings);
             return RedirectToAction();
         }
     }

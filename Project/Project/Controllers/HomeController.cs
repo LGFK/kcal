@@ -28,12 +28,5 @@ namespace Project.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-
-        //TEST
-        [HttpGet]
-        public IActionResult AdditionalInfo()
-        {
-            return View();
-        }
     }
 }

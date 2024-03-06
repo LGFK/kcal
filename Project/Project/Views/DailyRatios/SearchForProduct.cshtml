@@ -12,6 +12,19 @@
 </p>
 
 <div class="row">
+
+    <div class="input-group ">
+        <div class="row">
+            <form asp-action="SearchForProduct" enctype="multipart/form-data" method="post">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Search" name="productName">
+                    <button class="btn btn-secondary" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+
     @if(Model != null)
     {
         foreach(Food item in Model)
