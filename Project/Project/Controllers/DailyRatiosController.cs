@@ -109,6 +109,7 @@ namespace Project.Controllers
                             List<Food> foodToAddToLocalDb = new List<Food>();
                             foreach (var prod in listJson)
                             {
+
                                 var prodToAdd = new Food()
                                 {
                                     KcalPer100g = prod.energykcal_100g,
@@ -117,29 +118,21 @@ namespace Project.Controllers
                                     Name = prod.product_name,
                                     Proteins = prod.proteins_100g
                                 };
-                                foodToAddToLocalDb.Add(prodToAdd);
-
+                                if(!String.IsNullOrEmpty(prodToAdd.Name))
+                                {
+                                    foodToAddToLocalDb.Add(prodToAdd);
+                                }
                             }
                             if (foodToAddToLocalDb.Any())
                             {
                                 await _fRepo.AddEntities(foodToAddToLocalDb);
                             }
-                            food = (await _fRepo.GetEntitiesList()).Where(f => f.Name == productName).ToList();
+                            food = (await _fRepo.GetEntitiesList()).Where(f => f.Name.ToLower().Contains(productName.ToLower())).ToList();
 
                         }
 
                     }
-                    else
-                    {
-                        //var prodToAdd = new Food()
-                        //{
-                        //    KcalPer100g = prod.energykcal_100g,
-                        //    Carbohydrates = prod.carbohydrates_100g,
-                        //    Fats = prod.fat_100g,
-                        //    Name = prod.product_name,
-                        //    Proteins = prod.proteins_100g
-                        //};
-                    }
+                   
                     return View("SearchForProduct", food); //надо дописать что возвращает view View(food)
                 }
                 return View();
