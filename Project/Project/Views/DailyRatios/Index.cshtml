@@ -36,7 +36,7 @@
                     </li>
 
                 <li class="list-group-item bg-success bg-opacity-25">Daily goal: @Math.Round(Model.DailyKcalGoal)</li>
-                <li class="list-group-item bg-success bg-opacity-25">Date: @Model.Date</li>
+                <li class="list-group-item bg-success bg-opacity-25">Date: @Model.Date.ToShortDateString()</li>
                 </ul>
             <form asp-action="EatDishesInCart" method="post" class="bg-success bg-opacity-25">
                     <button type="submit" class="btn btn-bg btn-primary m-2">Eat</button>
