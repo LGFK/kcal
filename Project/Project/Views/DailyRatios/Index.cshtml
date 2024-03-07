@@ -5,25 +5,48 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Daily Ratio</h1>
 
-<div class="card" style="width: 18rem;">
-    <div class="card-header">@Model.UserId</div>
-    <ul class="list-group list-group-flush">
-        @if (Model.DailyKcalGoal <= Model.CcalAlreadyUsed)
-        {
-            <li class="list-group-item bg-danger text-white">@Model.CcalAlreadyUsed</li>
-        }
-        else
-        {
-            <li class="list-group-item bg-success text-white">@Model.CcalAlreadyUsed</li>
-        }
 
-        <li class="list-group-item">@Model.DailyKcalGoal</li>
-        <li class="list-group-item">@Model.Date</li>
-        <li class="list-group-item">@Model.Id</li>
-        <form asp-action="EatDishesInCart" method="post">
-            <button type="submit" class="btn btn-sm btn-primary">Eat</button>
-        </form>
-    </ul>
-</div>
+
+
+    <h1 style="text-align:center;">Daily Ratio</h1>
+    <div class="col-12">
+        <div class="d-flex justify-content-center">
+        <div class="card" style="width: 30rem;">
+                
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item text-white bg-success bg-opacity-25">
+                        @{
+                            int proc = (int)Math.Round(100 * Model.CcalAlreadyUsed / Model.DailyKcalGoal);
+                        }
+                        @if (Model.DailyKcalGoal <= Model.CcalAlreadyUsed)
+                        {
+
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">@Model.CcalAlreadyUsed</div>
+                            </div>
+
+                        }
+                        else
+                        {
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @proc%" aria-valuenow="@proc" aria-valuemin="0" aria-valuemax="100">@Model.CcalAlreadyUsed</div>
+                            </div>
+                        }
+                    </li>
+
+                <li class="list-group-item bg-success bg-opacity-25">Daily goal: @Math.Round(Model.DailyKcalGoal)</li>
+                <li class="list-group-item bg-success bg-opacity-25">Date: @Model.Date</li>
+                </ul>
+            <form asp-action="EatDishesInCart" method="post" class="bg-success bg-opacity-25">
+                    <button type="submit" class="btn btn-bg btn-primary m-2">Eat</button>
+                </form>
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+

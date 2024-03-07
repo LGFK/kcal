@@ -157,21 +157,17 @@ namespace Project.Controllers
                 if (!string.IsNullOrEmpty(dishesInCartStr))
                 {
                     dishesInCart = JsonConvert.DeserializeObject<List<EatenFood>>(dishesInCartStr);
+                    foreach (var dish in dishesInCart)
+                    {
+                        dish.DailyRatioId = currDailyRatio.Id;
+                        await _fRepo.AddEatenFood(dish);
+                        var food = (await _fRepo.GetEntity(dish.DishId));
+                        currDailyRatio.CcalAlreadyUsed += food.KcalPer100g / 100 * dish.Weight;
+                    }
+                    _ratioRepo.UpdateEntity(currDailyRatio);
+                    HttpContext.Session.SetString("EatenFoodCart", JsonConvert.SerializeObject(new List<EatenFood>()));
                 }
                
-                if (dishesInCart == null)
-                {
-                    throw new Exception("No Dishes In cart");
-                }
-                foreach (var dish in dishesInCart)
-                {
-                    dish.DailyRatioId = currDailyRatio.Id;
-                    await _fRepo.AddEatenFood(dish);
-                    var food =  (await _fRepo.GetEntity(dish.DishId));
-                    currDailyRatio.CcalAlreadyUsed += food.KcalPer100g / 100 * dish.Weight;
-                }
-                _ratioRepo.UpdateEntity(currDailyRatio);
-                HttpContext.Session.SetString("EatenFoodCart", JsonConvert.SerializeObject(new List<EatenFood>()));
                 return View("Index",currDailyRatio);
             }
             catch(Exception ex)

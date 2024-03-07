@@ -18,5 +18,19 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    background: url('23432012_6759976.svg') no-repeat center center fixed;
+    margin-bottom: 60px;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.tableDishes{
+    overflow-y:auto;
+    height: 70vh;
+}
+.tableDishes thead th{
+    position:sticky;
+    top:0;
 }
