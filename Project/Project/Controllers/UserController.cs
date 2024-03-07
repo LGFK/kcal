@@ -70,8 +70,7 @@ namespace Project.Controllers
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
             _sR.UpdateDescription(user.Id, userSettingsFromForm.UserDescription);
             _sR.UpdateSettings(user.Id, userSettingsFromForm.Settings);
-            HttpContext.Session.SetString("AddedInfo", "");
-            return RedirectToAction();
+            return RedirectToAction("Index","DailyRatios");
         }
     }
 }
